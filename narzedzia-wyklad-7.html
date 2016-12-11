@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Title</title>
+    <meta charset="utf-8">
+    <style>
+      @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+      @import url(https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
+      @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+
+      body { font-family: 'Droid Serif'; }
+      h1, h2, h3 {
+        font-family: 'Yanone Kaffeesatz';
+        font-weight: normal;
+      }
+      .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+
+## Srodowiska i narzedzia wytwarzania oprogramowania - wyklad 7
+
+<img src="./Docker-logo.png" width="400">
+
+---
+#### Architektura Dockera
+
+<img src="./docker-architecture.png" width="800">
+
+---
+#### Konteneryzacja serwera Apache
+
+```bash
+docker search httpd
+NAME     DESCRIPTION                       STARS    OFFICIAL    AUTOMATED
+httpd    The Apache HTTP Server Project    815      [OK]    
+centos/httpd                               10       [OK]
+...
+```
+```bash
+docker pull httpd
+Using default tag: latest
+latest: Pulling from library/httpd
+386a066cd84a: Already exists 
+a11d6b8e2fac: Pull complete 
+...
+f02435546328: Pull complete 
+Digest: sha256:10fd24b8d20ffd15cb21d49529be5952d828ba3f269564cc8ebe60053293ceba
+Status: Downloaded newer image for httpd:latest
+```
+
+```bash
+docker images
+REPOSITORY                TAG          IMAGE ID        CREATED        SIZE
+httpd                     latest       ff3a8919cd88    4 days ago     175.3 MB
+tjel/ubuntu-nodejs-nano   latest       cba321242ee4    13 days ago    216.8 MB
+...
+```
+
+---
+#### Konteneryzacja serwera Apache
+
+
+```bash
+docker run -d --name MyWebServer -P httpd
+ff25c214d301eb5759d61d4140e333736f7a76744b4f2f57feb69af4aa402d01
+```
+
+```bash
+docker ps
+CONTAINER ID  IMAGE    COMMAND             CREATED          STATUS       
+ff25c214d301  httpd    "httpd-foreground"  33 seconds ago   Up 30 seconds
+PORTS                  NAMES
+0.0.0.0:32769->80/tcp  MyWebServer
+```
+```bash
+docker stop MyWebServer
+MyWebServer
+```
+
+```bash
+docker ps
+CONTAINER ID  IMAGE  COMMAND  CREATED  STATUS  PORTS  NAMES
+```
+
+```bash
+docker start MyWebServer
+MyWebServer
+```
+
+---
+#### Mapowanie portow kontenera
+
+
+```bash
+cat Dockerfile
+...
+EXPOSE 80
+CMD httpd-foreground
+```
+
+```bash
+docker port MyWebServer 
+80/tcp -> 0.0.0.0:32769
+```
+
+```bash
+ifconfig 
+docker0   Link encap:Ethernet  HWaddr 02:42:15:a4:d5:fc  
+          inet addr:172.17.0.1  Bcast:0.0.0.0  Mask:255.255.0.0
+          inet6 addr: fe80::42:15ff:fea4:d5fc/64 Scope:Link
+...
+wlan0     Link encap:Ethernet  HWaddr b0:10:41:8f:80:4d  
+          inet addr:192.168.0.17  Bcast:192.168.0.255  Mask:255.255.255.0
+          inet6 addr: fe80::b210:41ff:fe8f:804d/64 Scope:Link
+```
+<img src="./apache-printscreen.png" width="600">
+
+---
+#### Mapowanie portow kontenera
+
+```bash
+-p HostPort:ContainerPort
+```
+```bash
+docker stop MyWebServer
+MyWebServer
+```
+```bash
+docker rm MyWebServer
+MyWebServer
+```
+```bash
+docker run -d --name MyWebServer -p 8080:80 httpd
+3d1629800248e434c7ff0d6e146014a8aabbb67653b60f74e9c624ddff9a0d85
+```
+<img src="./apache-printscreen-8080.png" width="600">
+
+---
+#### Konteneryzacja serwera Apache
+
+
+
+---
+#### Konteneryzacja serwera Apache
+
+
+
+
+
+
+
+
+    </textarea>
+    <script src="https://gnab.github.io/remark/downloads/remark-latest.min.js">
+    </script>
+    <script>
+      var slideshow = remark.create();
+    </script>
+  </body>
+</html>

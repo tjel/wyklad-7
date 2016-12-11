@@ -138,17 +138,129 @@ docker run -d --name MyWebServer -p 8080:80 httpd
 <img src="./apache-printscreen-8080.png" width="600">
 
 ---
-#### Konteneryzacja serwera Apache
+#### Wspoldzielenie zasobow dyskowych - montowanie dysku
 
-
+```bash
+docker run -it -v /data --name container1 busybox
+Unable to find image 'busybox:latest' locally
+latest: Pulling from library/busybox
+56bec22e3559: Pull complete 
+Digest: sha256:29f5d56d12684887bdfa50dcd29fc31eea4aaf4ad3bec43daf19026a7ce69912
+Status: Downloaded newer image for busybox:latest
+/ # ls
+bin   data  dev   etc   home  proc  root  sys   tmp   usr   var
+/ # cd data
+/data # touch file1.txt
+/data # ls
+file1.txt
+/data # exit
+```
+```bash
+docker inspect container1
+...
+"Mounts": [
+            {
+                "Name": "5336aee6ac32026b17fe34a1b7b8a82ddc6ce0ade1b7984bfc86fe323f6c5d60",
+                "Source": "/var/lib/docker/volumes/5336aee6ac32026b17fe34a1b7b8a82ddc6ce0ade1b7984bfc86fe323f6c5d60/_data",
+                "Destination": "/data",
+                "Driver": "local",
+                "Mode": "",
+                "RW": true,
+                "Propagation": ""
+            }
+        ],
+...
+```
 
 ---
-#### Konteneryzacja serwera Apache
+#### Wspoldzielenie zasobow dyskowych - montowanie dysku
 
+```bash
+sudo ls /var/lib/docker/volumes/\
+5336aee6ac32026b17fe34a1b7b8a82ddc6ce0ade1b7984bfc86fe323f6c5d60/_data
+file1.txt
+```
 
+```bash
+docker restart container1
+container1
+docker attach container1
 
+/ # ls
+bin   data  dev   etc   home  proc  root  sys   tmp   usr   var
+/ # cd data
+/data # ls
+file1.txt
+/data # exit
+```
+```bash
+docker rm container1
+container1
+sudo ls /var/lib/docker/volumes/\
+5336aee6ac32026b17fe34a1b7b8a82ddc6ce0ade1b7984bfc86fe323f6c5d60/_data
+file1.txt
+```
 
+```bash
+docker rm --help
+Usage: docker rm [OPTIONS] CONTAINER [CONTAINER...]
+... 
+-v, --volumes=false Remove the volumes associated with the container
+```
 
+---
+#### Montowanie katalogu hosta w kontenerze
+
+```bash
+-v HostFolder:ContainerVolumeName
+```
+
+```bash
+ls ~/docker/shared
+shared-test-1.txt
+```
+
+```bash
+docker run -it --name container1 -v ~/docker/shared:/shared busybox
+
+/ # ls
+bin   dev   etc   home  proc  root  shared  sys   tmp   usr   var
+/ # cd shared
+shared-test-1.txt
+```
+
+---
+#### Wspoldzielenie zasobow pomiedzy kontenerami
+
+```bash
+ocker run -it -v /data --name container3 busybox
+/ # cd data
+/data # ls 
+/data # touch file1.txt
+/data # touch file2.txt
+/data # touch file2.txt
+```
+
+```bash
+docker ps
+CONTAINER ID   IMAGE     COMMAND   CREATED        STATUS        PORTS  NAMES
+9e4fcfd8eae6   busybox   "sh"      2 minutes ago  Up 2 minutes         container3
+```
+
+```bash
+docker exec container3 ls /data
+file1.txt
+file2.txt
+```
+
+```bash
+docker run -it --volumes-from container3 --name container4 busybox
+/ # ls
+bin   data  dev   etc   home  proc  root  sys   tmp   usr   var
+/ # cd data
+/data # ls
+file1.txt  file2.txt
+```
 
 
 

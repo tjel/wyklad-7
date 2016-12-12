@@ -549,7 +549,113 @@ PORTS                   NAMES
 0.0.0.0:32770->80/tcp   nginx-webserver
 ```
 
-<img src="./dockerized-nginx.png" width="400">
+```bash
+curl http://192.168.0.13:32771
+<h1>Hello from Dockerized NGINX!</h1>
+```
+<img src="./dockerized-nginx.png" width="600">
+
+---
+#### 'Best practices for writing Dockerfiles'
+
+- Containers should be ephemeral
+
+- Use a .dockerignore file
+
+- Run only one process per container
+
+- Minimize the number of layers
+
+- Build cache
+
+- Sort multi-line arguments
+
+```bash
+RUN apt-get update && apt-get install -y \
+  bzr \
+  cvs \
+  git \
+  mercurial \
+  subversion
+```
+---
+#### Ustawienia sieciowe Dockera
+
+```bash
+ifconfig
+docker0   Link encap:Ethernet  HWaddr 02:42:29:2a:65:4f  
+          inet addr:172.17.0.1  Bcast:0.0.0.0  Mask:255.255.0.0
+          inet6 addr: fe80::42:29ff:fe2a:654f/64 Scope:Link
+```
+
+```bash
+docker network ls
+NETWORK ID          NAME         DRIVER      SCOPE
+4039687b438d        bridge       bridge      local               
+7139f9d6c5d9        host         host        local               
+c07c4930f247        none         null        local    
+```
+
+```bash
+docker run --network=<NETWORK>
+```
+```bash
+docker attach nonenetcontainer
+
+root@0cb243cd1293:/# cat /etc/hosts
+127.0.0.1	localhost
+::1	localhost ip6-localhost ip6-loopback
+fe00::0	ip6-localnet
+ff00::0	ip6-mcastprefix
+ff02::1	ip6-allnodes
+ff02::2	ip6-allrouters
+root@0cb243cd1293:/# ifconfig
+lo        Link encap:Local Loopback
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          inet6 addr: ::1/128 Scope:Host
+```
+---
+#### Ustawienia sieciowe Dockera
+
+```bash
+docker network inspect bridge
+    {
+        "Name": "bridge",
+        "Id": "4039687b438d32a937d0a013eb7d920d81c9cd3cc401308a3564e6fc1043f348",
+...
+        "Driver": "bridge",
+        "EnableIPv6": false,
+        "IPAM": {
+...
+            "Config": [
+                {
+                    "Subnet": "172.17.0.0/16",
+                    "Gateway": "172.17.0.1"
+                }
+            ]
+        },
+        "Internal": false,
+        "Containers": {
+            "324af2c3402cf30f0ccd451d15571b1b33889fc0f797803fb87ef8990c7b9903": {
+                "Name": "angry_yalow",
+...
+                "MacAddress": "02:42:ac:11:00:02",
+                "IPv4Address": "172.17.0.2/16",
+            },
+            "ddc141919c727c7c65abf9bdbdaa9a314bdb12537db94e31ff6fa12aed02131b": {
+                "Name": "nginx-webserver",
+...
+                "MacAddress": "02:42:ac:11:00:03",
+                "IPv4Address": "172.17.0.3/16",
+            }
+        },
+...
+```
+
+
+
+
+
 
 
 
